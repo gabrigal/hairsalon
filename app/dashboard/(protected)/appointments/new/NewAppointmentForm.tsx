@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { SERVICE_CATEGORIES, ALL_SERVICES, STYLISTS, TIME_TO_HOUR, getStylistSlots, isStylistAvailableOnDay } from "@/lib/services";
+import { SERVICE_CATEGORIES, ALL_SERVICES, STYLISTS, TIME_TO_HOUR, getStylistSlots, isStylistAvailableOnDay, isStylistDateBlocked } from "@/lib/services";
 import type { BookingSource } from "@/lib/database.types";
 
 interface CustomerResult {
@@ -117,13 +117,15 @@ export default function NewAppointmentForm() {
     }
   }, []);
 
-  // Available time slots for the selected date, respecting per-stylist schedule and duration cutoff
+  // Available time slots for the selected date, respecting per-stylist schedule, duration cutoff, and blocked dates
   const dayOfWeek = date ? new Date(`${date}T12:00:00`).getDay() : -1;
   const availableSlots: string[] = dayOfWeek >= 0
-    ? getStylistSlots(stylist || '', dayOfWeek, durationMinutes)
+    ? getStylistSlots(stylist || '', dayOfWeek, durationMinutes, date || undefined)
     : [];
   const isClosed = dayOfWeek >= 0 && (
-    stylist ? !isStylistAvailableOnDay(stylist, dayOfWeek) : availableSlots.length === 0
+    stylist
+      ? (isStylistDateBlocked(stylist, date) || !isStylistAvailableOnDay(stylist, dayOfWeek))
+      : availableSlots.length === 0
   );
 
   // Reset time when date changes and current time is no longer available

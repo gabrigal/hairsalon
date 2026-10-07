@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
   if (time && dateISO) {
     const dayOfWeek = new Date(`${dateISO}T12:00:00`).getDay();
     const durationMins = parseDurationMinutes(duration ?? '');
-    const validSlots = getStylistSlots(stylist, dayOfWeek, durationMins);
+    const validSlots = getStylistSlots(stylist, dayOfWeek, durationMins, dateISO);
     if (!validSlots.includes(time)) {
       return NextResponse.json(
         { error: 'That time is not available for the selected stylist.' },

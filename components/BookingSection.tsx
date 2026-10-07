@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
-import { SERVICE_CATEGORIES, ALL_SERVICES, TIME_TO_HOUR, SCHEDULE, TIME_SLOTS, getStylistSlots, isStylistAvailableOnDay } from "@/lib/services";
+import { SERVICE_CATEGORIES, ALL_SERVICES, TIME_TO_HOUR, SCHEDULE, TIME_SLOTS, getStylistSlots, isStylistAvailableOnDay, isStylistDateBlocked } from "@/lib/services";
 
 const STYLISTS = [
   { id: "joann", label: "Joann", callOnly: false },
@@ -359,8 +359,9 @@ function CalendarPicker({
           {days.map((day, i) => {
             if (!day) return <div key={`empty-${i}`} />;
             const isPast = day < today;
+            const dISO = `${day.getFullYear()}-${String(day.getMonth()+1).padStart(2,'0')}-${String(day.getDate()).padStart(2,'0')}`;
             const isClosed = stylistId
-              ? !isStylistAvailableOnDay(stylistId, day.getDay())
+              ? (isStylistDateBlocked(stylistId, dISO) || !isStylistAvailableOnDay(stylistId, day.getDay()))
               : SCHEDULE[day.getDay()] === null;
             const isUnavailable = isPast || isClosed;
             const isSelected = selected && isSameDay(day, selected);
@@ -418,9 +419,12 @@ function TimePicker({
   // Block any slot within 30 minutes of now
   const currentMinutes = now.getHours() * 60 + now.getMinutes() + 30;
 
-  // Slots for the selected day, respecting per-stylist schedule and duration cutoff
+  // Slots for the selected day, respecting per-stylist schedule, duration cutoff, and blocked dates
+  const selDateISO = selectedDate
+    ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth()+1).padStart(2,'0')}-${String(selectedDate.getDate()).padStart(2,'0')}`
+    : undefined;
   const daySlots = selectedDate
-    ? getStylistSlots(stylistId ?? '', selectedDate.getDay(), durationMins)
+    ? getStylistSlots(stylistId ?? '', selectedDate.getDay(), durationMins, selDateISO)
     : TIME_SLOTS;
 
   return (

@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
 
   // ── Validate time slot against stylist's schedule ──────────────────────────
   const bookingDayOfWeek = new Date(`${date}T12:00:00`).getDay();
-  const validSlots = getStylistSlots(stylist, bookingDayOfWeek, durationMinutes ?? 60);
+  const validSlots = getStylistSlots(stylist, bookingDayOfWeek, durationMinutes ?? 60, date);
   if (!validSlots.includes(time)) {
     return NextResponse.json(
       { error: 'That time is not available for the selected stylist.' },

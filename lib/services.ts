@@ -127,6 +127,19 @@ export interface StylistConfig {
   closeHour: Partial<Record<number, number>>;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// One-off blocked dates per stylist (YYYY-MM-DD, salon timezone)
+// Add a date here when a stylist is out for a specific day.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const STYLIST_BLOCKED_DATES: Record<string, string[]> = {
+  joann: ['2026-10-11'],
+};
+
+export function isStylistDateBlocked(stylistId: string, dateISO: string): boolean {
+  return (STYLIST_BLOCKED_DATES[stylistId] ?? []).includes(dateISO);
+}
+
 export const STYLIST_SCHEDULE: Record<string, StylistConfig> = {
   luis: {
     schedule: {
@@ -151,8 +164,11 @@ export const STYLIST_SCHEDULE: Record<string, StylistConfig> = {
 export function getStylistSlots(
   stylistId: string,
   dayOfWeek: number,
-  durationMins?: number
+  durationMins?: number,
+  dateISO?: string
 ): string[] {
+  if (dateISO && isStylistDateBlocked(stylistId, dateISO)) return [];
+
   const config = STYLIST_SCHEDULE[stylistId];
   const base: string[] = config
     ? [...(config.schedule[dayOfWeek] ?? [])]
