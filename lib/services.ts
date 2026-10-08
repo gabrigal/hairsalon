@@ -133,7 +133,7 @@ export interface StylistConfig {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const STYLIST_BLOCKED_DATES: Record<string, string[]> = {
-  joann: ['2026-10-11'],
+  joann: ['2026-10-10'],
 };
 
 export function isStylistDateBlocked(stylistId: string, dateISO: string): boolean {
